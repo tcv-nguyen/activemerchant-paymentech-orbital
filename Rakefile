@@ -9,7 +9,7 @@ begin
     gem.email = "john@mintdigital.com"
     gem.homepage = "http://github.com/johnideal/activemerchant-paymentech-orbital"
     gem.authors = ["John Corrigan"]
-    gem.add_dependency("activemerchant", "= 1.4.2")
+    gem.add_dependency("activemerchant", "= 1.17.0")
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
