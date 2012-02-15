@@ -9,7 +9,7 @@ begin
     gem.email = "john@mintdigital.com"
     gem.homepage = "http://github.com/johnideal/activemerchant-paymentech-orbital"
     gem.authors = ["John Corrigan"]
-    gem.add_dependency("activemerchant", "= 1.17.0")
+    gem.add_dependency("activemerchant", "= 1.20.1")
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
@@ -46,7 +46,7 @@ task :test => :check_dependencies
 
 task :default => :test
 
-require 'rake/rdoctask'
+require 'rdoc/task'
 Rake::RDocTask.new do |rdoc|
   if File.exist?('VERSION')
     version = File.read('VERSION')
