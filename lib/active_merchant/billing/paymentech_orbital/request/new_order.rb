@@ -57,7 +57,7 @@ module ActiveMerchant
             if credit_card
               xml.tag! "CardBrand", credit_card.respond_to?(:brand) ? credit_card.brand : credit_card.type
               xml.tag! "AccountNum", credit_card.number
-              xml.tag! "Exp", "#{("0" + credit_card.month.to_s)[-2..-1]}#{credit_card.year.to_s[2..-1]}"
+              xml.tag! "Exp", "#{("0" + credit_card.month.to_s)[-2..-1]}#{credit_card.year.to_s[-2..-1]}"
               add_currency(xml)
               xml.tag! "CardSecValInd", "1"
               xml.tag! "CardSecVal", credit_card.verification_value
