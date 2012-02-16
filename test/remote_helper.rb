@@ -1,5 +1,5 @@
 require 'test_helper'
-require 'faster_csv'
+require 'csv'
 require 'yaml'
 
 class Test::Unit::TestCase
@@ -10,7 +10,7 @@ class Test::Unit::TestCase
     @certification_file = "certification.csv"
 
     unless @@csv
-      @@csv = FasterCSV.open(@certification_file, "w")
+      @@csv = CSV.open(@certification_file, "w")
       @@csv << [ 
         "Request Type", "Date/Time", "MerchantID", "Order #", 
         "IndustryType", "Amount", "Currency", "CustomerRefNum",

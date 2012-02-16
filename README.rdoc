@@ -2,6 +2,16 @@
 
 A gem to provide a ruby interface for Chase Paymentech Orbital payment gateway.
 
+= Testing
+
+You'll need factory_girl, shoulda, and jeweler gems installed
+
+copy config/gateway.yml.example to config/gateway.yml and put in your credentials
+
+run "rake remote"
+
+If you get error 412 - check your credentials then contact Chase Paymentech Support at (866) 645-1314, and have them review and confirm all of your information
+
 == Note on Patches/Pull Requests
  
 * Fork the project.

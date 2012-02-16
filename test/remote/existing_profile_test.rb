@@ -13,7 +13,6 @@ require 'remote_helper'
 class ProfileTest < Test::Unit::TestCase
   context "With a master_card" do
     setup do
-      ActiveMerchant::Billing::PaymentechOrbital::Gateway.currency_code = "978"
       @gateway = remote_gateway
       @address = Options(:billing_address)
       @credit_card = Factory(:master_card)
@@ -45,7 +44,6 @@ class ProfileTest < Test::Unit::TestCase
 
   context "With a visa" do
     setup do
-      ActiveMerchant::Billing::PaymentechOrbital::Gateway.currency_code = "978"
       @gateway = remote_gateway
       @address = Options(:billing_address)
       @credit_card = Factory(:visa)

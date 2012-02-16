@@ -3,7 +3,6 @@ require 'remote_helper'
 class RefundTest < Test::Unit::TestCase
   context "Refund" do
     setup do
-      ActiveMerchant::Billing::PaymentechOrbital::Gateway.currency_code = "978"
       @gateway = remote_gateway
       @address = Options(:billing_address)
     end
