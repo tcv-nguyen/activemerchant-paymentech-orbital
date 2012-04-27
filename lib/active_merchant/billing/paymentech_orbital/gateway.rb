@@ -37,7 +37,7 @@ module ActiveMerchant #:nodoc:
         # Headers
         self.headers = {
           "MIME-Version" => "1.0",
-          "Content-Type" => "Application/PTI51",
+          "Content-Type" => "Application/PTI54",
           "Content-transfer-encoding" => "text",
           "Request-number" => "1",
           "Document-type" => "Request"
@@ -58,6 +58,12 @@ module ActiveMerchant #:nodoc:
           @request = Request::NewOrder.new("A", money, credit_card, options.merge(@options))
 
           commit('authonly', @request)
+        end
+
+        def capture(money, tx_ref_num, options = {})
+          @request = Request::MarkForCapture.new(money, tx_ref_num, options.merge(@options))
+
+          commit('capture', @request)
         end
 
         def purchase(money, credit_card=nil, options = {})

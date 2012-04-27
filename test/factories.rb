@@ -3,7 +3,7 @@ Factory.define :credit_card, {
   :default_strategy => :build
 } do |f|
   f.month 10
-  f.year 12
+  f.year Date.today.year + 1
   f.first_name 'Joe'
   f.last_name 'Smith'
 end
@@ -21,7 +21,8 @@ end
 Factory.define :discover, {
   :class => ActiveMerchant::Billing::CreditCard,
   :default_strategy => :build,
-  :parent => :credit_card
+  :parent => :credit_card,
+  :aliases => [:ds]
 } do |f|
   f.number "6011000995500000"
   f.add_attribute :type, 'DI'
@@ -31,10 +32,21 @@ end
 Factory.define :master_card, {
   :class => ActiveMerchant::Billing::CreditCard,
   :default_strategy => :build,
-  :parent => :credit_card
+  :parent => :credit_card,
+  :aliases => [:mc]
 } do |f|
   f.number "5454545454545454"
   f.add_attribute :type, 'MC'
+  f.verification_value '123'
+end
+
+Factory.define :jcb, {
+  :class => ActiveMerchant::Billing::CreditCard,
+  :default_strategy => :build,
+  :parent => :credit_card
+} do |f|
+  f.number "3566002020140006"
+  f.add_attribute :type, 'JC'
   f.verification_value '123'
 end
 
@@ -43,7 +55,7 @@ Factory.define :visa, {
   :default_strategy => :build,
   :parent => :credit_card
 } do |f|
-  f.number "4444444444444448"
+  f.number "4788250000028291"
   f.add_attribute :type, 'VI'
   f.verification_value '123'
 end

@@ -15,7 +15,7 @@ module ActiveMerchant
           delegate :industry_type, :mb_type, :recurring_start_date,
             :recurring_end_date, :recurring_end_date_flag,
             :recurring_max_billings, :recurring_frequency,
-            :deferred_bill_date, :soft_descriptors, 
+            :deferred_bill_date, :soft_descriptors, :tx_ref_num,
             :to => :options
 
           def request_type; "NewOrder"; end
@@ -55,12 +55,19 @@ module ActiveMerchant
 
           def add_credit_card(xml)
             if credit_card
-              xml.tag! "CardBrand", credit_card.respond_to?(:brand) ? credit_card.brand : credit_card.type
+              # CardBrand field is not to be used for standard credit card transactions
+              # xml.tag! "CardBrand", credit_card.respond_to?(:brand) ? credit_card.brand : credit_card.type
               xml.tag! "AccountNum", credit_card.number
               xml.tag! "Exp", "#{("0" + credit_card.month.to_s)[-2..-1]}#{credit_card.year.to_s[-2..-1]}"
               add_currency(xml)
-              xml.tag! "CardSecValInd", "1"
-              xml.tag! "CardSecVal", credit_card.verification_value
+              if @message_type != 'R' # CVV not validated for refunds
+                # CardSecValInd is only applicable to Visa and Discover
+                # Also only sent when CardSecVal is present
+                if ['DI', 'VI'].include?(credit_card.type) && credit_card.verification_value.present?
+                  xml.tag! "CardSecValInd", "1"
+                end
+                xml.tag! "CardSecVal", credit_card.verification_value
+              end
             else
               xml.tag! "AccountNum", nil
               add_currency(xml)
@@ -82,6 +89,7 @@ module ActiveMerchant
           end
 
           def add_billing_address(xml)
+            return if address.blank? || @message_type == 'R'
             xml.tag! "AVSzip", address[:zip]
             if full_street_address.length < 30
               xml.tag! "AVSaddress1", full_street_address
@@ -97,6 +105,7 @@ module ActiveMerchant
           end
 
           def add_profile_management_options(xml)
+            return if @message_type == 'R'
             if customer_ref_num
               xml.tag! "CustomerRefNum", customer_ref_num
             else
@@ -108,6 +117,7 @@ module ActiveMerchant
           def add_order_information(xml)
             xml.tag! "OrderID", order_id
             xml.tag! "Amount", money
+            xml.tag! "TxRefNum", tx_ref_num if tx_ref_num.present?
           end
 
           def add_soft_descriptor_info(xml)
