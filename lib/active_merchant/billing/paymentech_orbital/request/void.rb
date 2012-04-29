@@ -5,7 +5,7 @@ module ActiveMerchant
         class Void < PaymentechOrbital::Request::Base
           attr_reader :tx_ref_num, :tx_ref_idx, :money
 
-          def initialize(tx_ref_num, tx_ref_idx, money=nil, options={})
+          def initialize(tx_ref_num, options={}, money=nil, tx_ref_idx=1)
             @tx_ref_num = tx_ref_num
             @tx_ref_idx = tx_ref_idx
             @money = money

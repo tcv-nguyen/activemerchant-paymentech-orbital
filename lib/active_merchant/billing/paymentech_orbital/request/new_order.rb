@@ -21,7 +21,7 @@ module ActiveMerchant
           def request_type; "NewOrder"; end
 
           def to_s
-            "#{self.class.message_map[@message_type]}: Credit Card (#{credit_card.type if credit_card})"
+            "#{self.class.message_map[@message_type]}: Credit Card (#{credit_card.cc_type if credit_card})"
           end
 
           def self.message_map
@@ -56,14 +56,14 @@ module ActiveMerchant
           def add_credit_card(xml)
             if credit_card
               # CardBrand field is not to be used for standard credit card transactions
-              # xml.tag! "CardBrand", credit_card.respond_to?(:brand) ? credit_card.brand : credit_card.type
+              # xml.tag! "CardBrand", credit_card.respond_to?(:brand) ? credit_card.brand : credit_card.cc_type
               xml.tag! "AccountNum", credit_card.number
               xml.tag! "Exp", "#{("0" + credit_card.month.to_s)[-2..-1]}#{credit_card.year.to_s[-2..-1]}"
               add_currency(xml)
               if @message_type != 'R' # CVV not validated for refunds
                 # CardSecValInd is only applicable to Visa and Discover
                 # Also only sent when CardSecVal is present
-                if ['DI', 'VI'].include?(credit_card.type) && credit_card.verification_value.present?
+                if ["american_express","discover"].include?(credit_card.cc_type) && credit_card.verification_value.present?
                   xml.tag! "CardSecValInd", "1"
                 end
                 xml.tag! "CardSecVal", credit_card.verification_value
@@ -76,7 +76,7 @@ module ActiveMerchant
           
           def card_sec_val_ind
             return "" unless credit_card
-            if credit_card.type == "amex"
+            if credit_card.cc_type == "american_express"
               ""
             else
               "1"

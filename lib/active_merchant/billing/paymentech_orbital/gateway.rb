@@ -84,8 +84,8 @@ module ActiveMerchant #:nodoc:
           commit("profile-#{action}", @request)
         end
 
-        def void(tx_ref_num, tx_ref_idx, money=nil, options={})
-          @request = Request::Void.new(tx_ref_num, tx_ref_idx, money, options.merge(@options))
+        def void(tx_ref_num, options={}, money=nil, tx_ref_idx = 1)
+          @request = Request::Void.new(tx_ref_num, options.merge(@options), money, tx_ref_idx)
 
           commit('void', @request)
         end

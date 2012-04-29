@@ -1,7 +1,7 @@
 module ActiveMerchant
   module Billing
     module PaymentechOrbital
-      class Response
+      class Response < ActiveMerchant::Billing::Response
         cattr_accessor :elements
         attr_reader :doc, :request_type
 
@@ -26,11 +26,12 @@ module ActiveMerchant
           @doc = REXML::Document.new(doc)
           @request_type = request_type
           @options = options
+          @params = {}
         end
 
         def success?
           case request_type
-          when "NewOrder"
+          when "NewOrder", "MarkForCapture"
             proc_success? && approved?
           when "Profile"
             profile_proc_success?
@@ -39,6 +40,10 @@ module ActiveMerchant
           else
             false
           end
+        end
+        
+        def message
+          @message ||= status_msg || resp_msg
         end
 
         def proc_success?
@@ -54,7 +59,7 @@ module ActiveMerchant
         end
 
         def authorization
-          approval_status
+          tx_ref_num
         end
 
         def test?
@@ -62,7 +67,7 @@ module ActiveMerchant
         end
 
         def avs_result
-          @avs_result ||= AVSResult.new({:code => avs_resp_code})
+          @avs_result ||= {:code => avs_resp_code}
         end
 
         def cvv_result

@@ -144,7 +144,7 @@ task :verify do
     ['14', :purchase]  # 8
   ].each do |order_id, request_type|
     tx_ref_num = tx_ref[request_type][order_id]
-    r = @gateway.void(tx_ref_num, '1', nil, {:order_id => order_id})
+    r = @gateway.void(tx_ref_num, {:order_id => order_id})
     if r.tx_ref_num.nil?
       puts "#{order_id}: #{r.status_msg}"
       puts r.to_xml
