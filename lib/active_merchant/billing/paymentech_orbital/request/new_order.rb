@@ -5,6 +5,28 @@ module ActiveMerchant
         class NewOrder < PaymentechOrbital::Request::Base
           attr_reader :message_type, :money, :credit_card
 
+          def numbers_only(string)
+            string.gsub(/[^0-9]/,'')
+          end
+
+          def uc_letters_only(string)
+            string.upcase.gsub(/[^A-Z]/,'')
+          end
+
+          def a_n_and_spaces_only(string)
+            string.strip.gsub(/\s+/,' ').gsub(/[^A-Z0-9 ]/i,'')
+          end
+
+          def format_zipcode(zipcode, country_code)
+            case uc_letters_only(country_code).first(2)
+            when 'US'
+              zipcode = numbers_only(zipcode).first(5)
+            else
+              zipcode = a_n_and_spaces_only(zipcode).first(6)
+            end
+            zipcode
+          end
+
           def initialize(message_type, money, credit_card, options)
             @message_type = message_type
             @money = money
@@ -57,7 +79,7 @@ module ActiveMerchant
             if credit_card
               # CardBrand field is not to be used for standard credit card transactions
               # xml.tag! "CardBrand", credit_card.respond_to?(:brand) ? credit_card.brand : credit_card.cc_type
-              xml.tag! "AccountNum", credit_card.number
+              xml.tag! "AccountNum", numbers_only(credit_card.number).first(19)
               xml.tag! "Exp", "#{("0" + credit_card.month.to_s)[-2..-1]}#{credit_card.year.to_s[-2..-1]}"
               add_currency(xml)
               if @message_type != 'R' # CVV not validated for refunds
@@ -66,20 +88,11 @@ module ActiveMerchant
                 if ["american_express","discover"].include?(credit_card.cc_type) && credit_card.verification_value.present?
                   xml.tag! "CardSecValInd", "1"
                 end
-                xml.tag! "CardSecVal", credit_card.verification_value
+                xml.tag! "CardSecVal", numbers_only(credit_card.verification_value).first(4)
               end
             else
               xml.tag! "AccountNum", nil
               add_currency(xml)
-            end
-          end
-          
-          def card_sec_val_ind
-            return "" unless credit_card
-            if credit_card.cc_type == "american_express"
-              ""
-            else
-              "1"
             end
           end
 
@@ -90,18 +103,14 @@ module ActiveMerchant
 
           def add_billing_address(xml)
             return if address.blank? || @message_type == 'R'
-            xml.tag! "AVSzip", address[:zip]
-            if full_street_address.length < 30
-              xml.tag! "AVSaddress1", full_street_address
-            else
-              xml.tag! "AVSaddress1", address[:address1]
-              xml.tag! "AVSaddress2", address[:address2]
-            end
-            xml.tag! "AVScity", address[:city]
-            xml.tag! "AVSstate", address[:state]
-            xml.tag! "AVSphoneNum" , address[:phone]
-            xml.tag! "AVSname", address[:name]
-            xml.tag! "AVScountryCode", address[:country]
+            xml.tag! "AVSzip", format_zipcode(address[:zip], address[:country])
+            xml.tag! "AVSaddress1", a_n_and_spaces_only(address[:address1]).first(30)
+            xml.tag! "AVSaddress2", a_n_and_spaces_only(address[:address2]).first(30)
+            xml.tag! "AVScity", a_n_and_spaces_only(address[:city]).first(20)
+            xml.tag! "AVSstate", uc_letters_only(address[:state]).first(2)
+            xml.tag! "AVSphoneNum", numbers_only(address[:phone]).first(14)
+            xml.tag! "AVSname", a_n_and_spaces_only(address[:name]).first(30)
+            xml.tag! "AVScountryCode", uc_letters_only(address[:country]).first(2)
           end
 
           def add_profile_management_options(xml)
@@ -115,7 +124,7 @@ module ActiveMerchant
           end
 
           def add_order_information(xml)
-            xml.tag! "OrderID", order_id
+            xml.tag! "OrderID", a_n_and_spaces_only(order_id).first(22)
             xml.tag! "Amount", money
             xml.tag! "TxRefNum", tx_ref_num if tx_ref_num.present?
           end
