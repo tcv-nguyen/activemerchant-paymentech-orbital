@@ -22,7 +22,7 @@ module ActiveMerchant
             when 'US'
               zipcode = numbers_only(zipcode).first(5)
             else
-              zipcode = a_n_and_spaces_only(zipcode).first(6)
+              zipcode = a_n_and_spaces_only(zipcode).first(7)
             end
             zipcode
           end
