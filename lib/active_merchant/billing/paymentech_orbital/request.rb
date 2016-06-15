@@ -67,6 +67,27 @@ module ActiveMerchant
             xml.tag! "OrbitalConnectionUsername", login
             xml.tag! "OrbitalConnectionPassword", password
           end
+
+          def numbers_only(string)
+            string.gsub(/[^0-9]/,'')
+          end
+
+          def uc_letters_only(string)
+            string.upcase.gsub(/[^A-Z]/,'')
+          end
+
+          def a_n_and_spaces_only(string)
+            string.strip.gsub(/\s+/,' ').gsub(/[^A-Z0-9 ]/i,'')
+          end
+
+          def format_zipcode(zipcode, country_code)
+            if country_code && uc_letters_only(country_code).first(2) == 'US'
+              numbers_only(zipcode).first(5)
+            else
+              a_n_and_spaces_only(zipcode).first(7)
+            end
+          end
+
         end
       end
     end

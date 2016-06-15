@@ -61,16 +61,18 @@ module ActiveMerchant
           end
 
           def add_profile_info(xml)
-            xml.tag! "CustomerName", address[:name]
+            xml.tag! "CustomerName", a_n_and_spaces_only(address[:name]).first(30) if address && address[:name]
             xml.tag! "CustomerRefNum", customer_ref_num if customer_ref_num
-            xml.tag! "CustomerAddress1", address[:address1]
-            xml.tag! "CustomerAddress2", address[:address]
-            xml.tag! "CustomerCity", address[:city]
-            xml.tag! "CustomerState", address[:state]
-            xml.tag! "CustomerZIP", address[:zip]
-            xml.tag! "CustomerEmail", address[:email]
-            xml.tag! "CustomerPhone", address[:phone]
-            xml.tag! "CustomerCountryCode", address[:country]
+            if address.present?
+              xml.tag! "CustomerAddress1", a_n_and_spaces_only(address[:address1]).first(30) if address[:address1]
+              xml.tag! "CustomerAddress2", a_n_and_spaces_only(address[:address2]).first(30) if address[:address2]
+              xml.tag! "CustomerCity", a_n_and_spaces_only(address[:city]).first(20) if address[:city]
+              xml.tag! "CustomerState", uc_letters_only(address[:state]).first(2) if address[:state]
+              xml.tag! "CustomerZIP", format_zipcode(address[:zip], address[:country]) if address[:zip]
+              xml.tag! "CustomerEmail", address[:email].first(128) if address[:email]
+              xml.tag! "CustomerPhone", numbers_only(address[:phone]).first(14) if address[:phone]
+              xml.tag! "CustomerCountryCode", uc_letters_only(address[:country]).first(2) if address[:country]
+            end
           end
 
           def add_customer_profile_management_options(xml)
@@ -87,7 +89,7 @@ module ActiveMerchant
           end
 
           def add_credit_card_info(xml)
-            xml.tag! "CCAccountNum", credit_card.number
+            xml.tag! "CCAccountNum", numbers_only(credit_card.number).first(19)
             xml.tag! "CCExpireDate", "#{("0" + credit_card.month.to_s)[-2..-1]}#{credit_card.year.to_s[-2..-1]}"
           end
 

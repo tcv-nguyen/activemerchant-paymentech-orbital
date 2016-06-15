@@ -5,28 +5,6 @@ module ActiveMerchant
         class NewOrder < PaymentechOrbital::Request::Base
           attr_reader :message_type, :money, :credit_card
 
-          def numbers_only(string)
-            string.gsub(/[^0-9]/,'')
-          end
-
-          def uc_letters_only(string)
-            string.upcase.gsub(/[^A-Z]/,'')
-          end
-
-          def a_n_and_spaces_only(string)
-            string.strip.gsub(/\s+/,' ').gsub(/[^A-Z0-9 ]/i,'')
-          end
-
-          def format_zipcode(zipcode, country_code)
-            case uc_letters_only(country_code).first(2)
-            when 'US'
-              zipcode = numbers_only(zipcode).first(5)
-            else
-              zipcode = a_n_and_spaces_only(zipcode).first(7)
-            end
-            zipcode
-          end
-
           def initialize(message_type, money, credit_card, options)
             @message_type = message_type
             @money = money
@@ -91,7 +69,6 @@ module ActiveMerchant
                 xml.tag! "CardSecVal", numbers_only(credit_card.verification_value).first(4)
               end
             else
-              xml.tag! "AccountNum", nil
               add_currency(xml)
             end
           end
@@ -103,21 +80,20 @@ module ActiveMerchant
 
           def add_billing_address(xml)
             return if address.blank? || @message_type == 'R'
-            xml.tag! "AVSzip", format_zipcode(address[:zip], address[:country])
-            xml.tag! "AVSaddress1", a_n_and_spaces_only(address[:address1]).first(30)
-            xml.tag! "AVSaddress2", a_n_and_spaces_only(address[:address2]).first(30)
-            xml.tag! "AVScity", a_n_and_spaces_only(address[:city]).first(20)
-            xml.tag! "AVSstate", uc_letters_only(address[:state]).first(2)
-            xml.tag! "AVSphoneNum", numbers_only(address[:phone]).first(14)
-            xml.tag! "AVSname", a_n_and_spaces_only(address[:name]).first(30)
-            xml.tag! "AVScountryCode", uc_letters_only(address[:country]).first(2)
+            xml.tag! "AVSzip", format_zipcode(address[:zip], address[:country]) if address[:zip]
+            xml.tag! "AVSaddress1", a_n_and_spaces_only(address[:address1]).first(30) if address[:address1]
+            xml.tag! "AVSaddress2", a_n_and_spaces_only(address[:address2]).first(30) if address[:address2]
+            xml.tag! "AVScity", a_n_and_spaces_only(address[:city]).first(20) if address[:city]
+            xml.tag! "AVSstate", uc_letters_only(address[:state]).first(2) if address[:state]
+            xml.tag! "AVSphoneNum", numbers_only(address[:phone]).first(14) if address[:phone]
+            xml.tag! "AVSname", a_n_and_spaces_only(address[:name]).first(30) if address[:name]
+            xml.tag! "AVScountryCode", uc_letters_only(address[:country]).first(2) if address[:country]
           end
 
           def add_profile_management_options(xml)
-            return if @message_type == 'R'
             if customer_ref_num
               xml.tag! "CustomerRefNum", customer_ref_num
-            else
+            elsif @message_type != 'R'
               xml.tag! "CustomerProfileFromOrderInd", "A"
               xml.tag! "CustomerProfileOrderOverrideInd", "NO"
             end
