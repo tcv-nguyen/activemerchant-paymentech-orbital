@@ -63,7 +63,7 @@ module ActiveMerchant
               if @message_type != 'R' # CVV not validated for refunds
                 # CardSecValInd is only applicable to Visa and Discover
                 # Also only sent when CardSecVal is present
-                if ["american_express","discover"].include?(credit_card.cc_type) && credit_card.verification_value.present?
+                if ["visa","discover"].include?(credit_card.cc_type) && credit_card.verification_value.present?
                   xml.tag! "CardSecValInd", "1"
                 end
                 xml.tag! "CardSecVal", numbers_only(credit_card.verification_value).first(4)
